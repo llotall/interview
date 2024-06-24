@@ -273,6 +273,139 @@ GC.Collect();
 
 ## Garbage Collector - end
 
+---
+
+# .NET
+
+# Вариантность и контрвариантность в C#
+
+## Введение
+
+Вариантность и контрвариантность определяют, как параметры обобщенных типов могут изменяться в иерархии наследования. Эти концепции особенно важны при работе с обобщениями (generics) в C#. Вариантность применяется к интерфейсам и делегатам и позволяет указать, могут ли **параметры обобщенного типа** использоваться как **более конкретный** (ковариантность) или **более общий** тип (контрвариантность).
+
+## Ковариантность (Covariance)
+
+### Описание
+
+Ковариантность позволяет использовать более конкретный тип (подтип) вместо более общего типа. Она поддерживается для выходных параметров обобщенного типа.
+
+### Пример
+
+```csharp
+public interface ICovariant<out T>
+{
+    T GetItem();
+}
+
+public class Animal { }
+public class Dog : Animal { }
+
+public class CovariantExample : ICovariant<Dog>
+{
+    public Dog GetItem()
+    {
+        return new Dog();
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        ICovariant<Dog> dog = new CovariantExample();
+        ICovariant<Animal> animal = dog; // Ковариантность позволяет это присваивание
+
+        Animal myAnimal = animal.GetItem();
+        Console.WriteLine(myAnimal.GetType().Name); // Output: Dog
+    }
+}
+```
+
+## **Описание ключевого слова out**
+- Ключевое слово out перед параметром типа T в объявлении интерфейса указывает на ковариантность.
+- Ковариантность применима к возвращаемым значениям методов (выходным параметрам).
+
+## Контрвариантность (Contravariance)
+
+### Описание
+
+Контрвариантность позволяет использовать более общий тип вместо более конкретного типа. Это значит, что вы можете передать объект базового типа туда, где ожидается объект производного типа. Она поддерживается для входных параметров обобщенного типа.
+
+```csharp
+public interface IContravariant<in T>
+{
+    void SetItem(T item);
+}
+
+public class Animal { }
+public class Dog : Animal { }
+
+public class ContravariantExample : IContravariant<Animal>
+{
+    public void SetItem(Animal item)
+    {
+        Console.WriteLine(item.GetType().Name);
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        IContravariant<Animal> animal = new ContravariantExample();
+        IContravariant<Dog> dog = animal; // Контрвариантность позволяет это присваивание
+
+        dog.SetItem(new Dog()); // Output: Dog
+    }
+}
+```
+
+### **Описание ключевого слова in**
+- Ключевое слово in перед параметром типа T в объявлении интерфейса указывает на контрвариантность.
+- Контрвариантность применима к параметрам методов (входным параметрам).
+
+## Инвариантность (Invariance)
+
+### Описание
+- Инвариантность означает, что обобщенный тип не поддерживает ни ковариантность, ни контрвариантность. Параметры обобщенного типа должны точно соответствовать указанному типу.
+
+```csharp
+public interface IInvariant<T>
+{
+    T GetItem();
+    void SetItem(T item);
+}
+
+public class Animal { }
+public class Dog : Animal { }
+
+public class InvariantExample : IInvariant<Dog>
+{
+    public Dog GetItem()
+    {
+        return new Dog();
+    }
+
+    public void SetItem(Dog item)
+    {
+        Console.WriteLine(item.GetType().Name);
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        IInvariant<Dog> dog = new InvariantExample();
+        // IInvariant<Animal> animal = dog; // Ошибка компиляции: нельзя присвоить IInvariant<Dog> переменной типа IInvariant<Animal>
+    }
+}
+```
+
+## Заключение
+- Ковариантность (out) позволяет использовать подтип вместо более общего типа для выходных параметров.
+- Контрвариантность (in) позволяет использовать более общий тип вместо подтипа для входных параметров.
+- Инвариантность не позволяет изменять тип параметра обобщенного типа.
 
 **Что такое Boxing и Unboxing?**
 
