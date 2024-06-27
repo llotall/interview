@@ -371,7 +371,7 @@ GC.Collect();
 
 ## Введение
 
-Вариантность и контрвариантность определяют, как параметры обобщенных типов могут изменяться в иерархии наследования. Эти концепции особенно важны при работе с обобщениями (generics) в C#. Вариантность применяется к интерфейсам и делегатам и позволяет указать, могут ли **параметры обобщенного типа** использоваться как **более конкретный** (ковариантность) или **более общий** тип (контрвариантность).
+Ковариантность и контрвариантность определяют, как параметры обобщенных типов могут изменяться в иерархии наследования. Эти концепции особенно важны при работе с обобщениями (generics) в C#. Ковариантность применяется к интерфейсам и делегатам и позволяет указать, могут ли **параметры обобщенного типа** использоваться как **более конкретный** (ковариантность) или **более общий** тип (контрвариантность).
 
 ## Ковариантность (Covariance)
 
@@ -1600,7 +1600,7 @@ private struct StateMachine : IAsyncStateMachine
   - Асинхронность: Идеально подходит для ввода-вывода, сетевых операций и других длительных задач, которые не нагружают процессор.
   - Параллельность: Эффективна для вычислительно интенсивных задач, которые могут быть разбиты на независимые части.
 
-## У тебя есть метод, который что-то долго вычисляет, например файторил миллиарда, нужно ли использовать асинхронность?
+## У тебя есть метод, который что-то долго вычисляет, например факториал миллиарда, нужно ли использовать асинхронность?
 
 Использование асинхронности для **вычислительно интенсивных задач**, таких как вычисление факториала миллиарда, может быть неэффективным, поскольку асинхронность лучше всего подходит для ввода-вывода и других операций, которые не нагружают процессор. В случае **вычислительно интенсивных задач** имеет смысл рассмотреть использование параллельности для улучшения производительности.
 
@@ -1708,7 +1708,6 @@ modelBuilder.Entity<Author>()
 EF поддерживает три типа наследования:
 - Table-per-Hierarchy (TPH)
 - Table-per-Type (TPT)
-- Table-per-Concrete-Type (TPC)  (не поддерживается в EF Core)
 
 ## EF Core поддерживает транзакции?
 
@@ -1892,6 +1891,10 @@ orders
 
 - Docker + k8s
 - Azure API Managment 
+
+## Outbox pattern
+
+Добавили запись в таблицу, сохранили, получили, пометили
 
 # Тестирование
 
@@ -2177,9 +2180,6 @@ REINDEX TABLE table_name;
 -- ## Проверить конкуренцию за ресурсы
 -- Высокая конкуренция за ресурсы (блокировки, I/O) может влиять на производительность. Используйте инструменты для мониторинга блокировок и конкуренции, такие как pg_stat_activity.
 SELECT * FROM pg_stat_activity WHERE state = 'active';
-
-
-
 ```
 
 ## **Уровни изоляции транзакций SQL**
@@ -2753,8 +2753,6 @@ COMMIT TRANSACTION;
 
 - **RUM (Reverse Indexes and Universal Match)**: Расширение для GIN, позволяющее более эффективно выполнять полнотекстовый поиск с возможностью сортировки по релевантности и фасетированному поиску.
 
-## **Как индексы облегчают поиск ?**
-
 ## Облегчение поиска с помощью индексов
 
 Индексы облегчают поиск в базе данных за счет создания дополнительных структур данных, которые позволяют быстро находить нужные записи. Основные способы, которыми индексы ускоряют поиск:
@@ -2798,3 +2796,192 @@ COMMIT TRANSACTION;
 ## Заключение
 
 Индексы являются мощным инструментом для улучшения производительности запросов в базах данных. Однако их использование должно быть тщательно продумано, чтобы избежать дополнительных затрат на пространство и замедление операций записи. Оптимальное использование индексов требует баланса между ускорением чтения данных и увеличением издержек на вставку, обновление и удаление данных.
+
+# Паттерны
+
+## SOLID
+
+SOLID принципы являются основными принципами разработки программного обеспечения, которые помогают разработчикам создавать более поддерживаемые и масштабируемые системы. В этом документе мы рассмотрим каждый принцип с примерами на C#.
+
+## Single Responsibility Principle (Принцип Единственной Ответственности)
+
+Класс должен иметь только одну причину для изменения, то есть он должен решать только одну задачу.
+
+```csharp
+public class Invoice
+{
+    public void CalculateTotal() 
+    {
+        // Логика расчета суммы счета
+    }
+}
+
+public class InvoicePrinter
+{
+    public void Print(Invoice invoice) 
+    {
+        // Логика печати счета
+    }
+}
+
+public class InvoiceSaver
+{
+    public void SaveToFile(Invoice invoice, string filePath) 
+    {
+        // Логика сохранения счета в файл
+    }
+}
+```
+
+## Open/Closed Principle (Принцип Открытости/Закрытости)
+
+Программные сущности (классы, модули, функции) должны быть открыты для расширения, но закрыты для модификации.
+
+```csharp
+public abstract class Shape
+{
+    public abstract double Area();
+}
+
+public class Circle : Shape
+{
+    public double Radius { get; set; }
+    public override double Area()
+    {
+        return Math.PI * Radius * Radius;
+    }
+}
+
+public class Rectangle : Shape
+{
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public override double Area()
+    {
+        return Width * Height;
+    }
+}
+```
+
+## Liskov Substitution Principle (Принцип Подстановки Лисков)
+
+Объекты в программе должны заменяться экземплярами их подтипов без изменения правильности выполнения программы.
+
+```csharp
+public class Bird
+{
+    public virtual void Fly() 
+    {
+        // Логика полета
+    }
+}
+
+public class Sparrow : Bird
+{
+    public override void Fly()
+    {
+        // Логика полета воробья
+    }
+}
+
+public class Ostrich : Bird
+{
+    public override void Fly()
+    {
+        throw new NotSupportedException("Страусы не умеют летать");
+    }
+}
+```
+
+## Interface Segregation Principle (Принцип Разделения Интерфейса)
+Клиенты не должны зависеть от интерфейсов, которые они не используют.
+
+```csharp
+public interface IPrinter
+{
+    void Print();
+    void Scan();
+    void Fax();
+}
+
+public class SimplePrinter : IPrinter
+{
+    public void Print()
+    {
+        // Логика печати
+    }
+
+    public void Scan()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Fax()
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+
+## Dependency Inversion Principle (Принцип Инверсии Зависимостей)
+Модули верхнего уровня не должны зависеть от модулей нижнего уровня. Оба типа модулей должны зависеть от абстракций. Абстракции не должны зависеть от деталей. Детали должны зависеть от абстракций.
+
+```csharp
+public class FileLogger
+{
+    public void Log(string message)
+    {
+        // Логика логирования в файл
+    }
+}
+
+public class UserService
+{
+    private FileLogger _logger = new FileLogger();
+
+    public void CreateUser(string username)
+    {
+        // Логика создания пользователя
+        _logger.Log("User created: " + username);
+    }
+}
+```
+
+```csharp
+
+public interface INotificationService
+{
+    void Send(string to, string subject, string body);
+}
+
+public class EmailService : INotificationService
+{
+    public void Send(string to, string subject, string body)
+    {
+        // Логика отправки email
+    }
+}
+
+public class SmsService : INotificationService
+{
+    public void Send(string to, string subject, string body)
+    {
+        // Логика отправки SMS
+    }
+}
+
+public class Notification
+{
+    private readonly INotificationService _notificationService;
+
+    public Notification(INotificationService notificationService)
+    {
+        _notificationService = notificationService;
+    }
+
+    public void Send(string message)
+    {
+        _notificationService.Send("user@example.com", "Notification", message);
+    }
+}
+```
